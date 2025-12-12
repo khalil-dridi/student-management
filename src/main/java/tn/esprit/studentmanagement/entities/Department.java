@@ -20,7 +20,6 @@ public class Department {
     private String phone;
     private String head; // chef de département
 
-    @OneToMany(mappedBy = "department")mvn clean install
-
+    @OneToMany(mappedBy = "department")
     private List<Student> students;
 }

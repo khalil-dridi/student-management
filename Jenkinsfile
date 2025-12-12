@@ -3,7 +3,13 @@ pipeline {
 
     tools {
         maven 'M2_HOME'    // Nom de ton Maven installé sur Jenkins
-        jdk 'JAVA_HOME'       // Nom de ton JDK installé sur Jenkins
+        jdk 'JAVA_HOME'    // Nom de ton JDK installé sur Jenkins
+    }
+
+    environment {
+        // Ces variables seront liées à tes credentials Jenkins pour Docker Hub
+        DOCKER_HUB_CREDENTIALS = 'dockerhub-cred'  // ID de tes credentials Jenkins
+        DOCKER_IMAGE_NAME = 'khalildridi9/student-management' // Nom de ton repo Docker Hub
     }
 
     stages {
@@ -26,6 +32,27 @@ pipeline {
             steps {
                 echo 'Récupération des résultats de tests pour Jenkins...'
                 junit '**/target/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo 'Construction de l\'image Docker...'
+                sh "docker build -t ${DOCKER_IMAGE_NAME}:latest ."
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                echo 'Connexion à Docker Hub et push de l\'image...'
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS}",
+                                                  usernameVariable: 'DOCKER_USERNAME',
+                                                  passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh '''
+                    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                    docker push ${DOCKER_IMAGE_NAME}:latest
+                    '''
+                }
             }
         }
     }

@@ -13,6 +13,11 @@ pipeline {
         SPRING_SERVICE_NAME = 'spring-service'
     }
 
+    triggers {
+        // Déclenche le pipeline automatiquement à chaque push sur GitHub
+        githubPush()
+    }
+
     stages {
 
         stage('Checkout') {
@@ -57,16 +62,17 @@ pipeline {
                 echo 'Analyse SonarQube...'
                 withSonarQubeEnv('sonarqube-server') {
                     withCredentials([string(credentialsId: 'SONAR_AUTH_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
-                        sh """
+                        sh '''
                             ./mvnw sonar:sonar \
                                 -Dsonar.projectKey=student-management \
                                 -Dsonar.host.url=$SONAR_HOST_URL \
                                 -Dsonar.login=$SONAR_AUTH_TOKEN
-                        """
+                        '''
                     }
                 }
             }
         }
+
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Déploiement sur Kubernetes...'
@@ -77,9 +83,7 @@ pipeline {
             }
         }
 
-
     }
-
 
     post {
         success {

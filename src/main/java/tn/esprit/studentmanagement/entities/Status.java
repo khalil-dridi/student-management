@@ -5,6 +5,5 @@ public enum Status {
     COMPLETED,
     DROPPED,
     FAILED,
-    WITHDRAWN,
-    PENDING
+    WITHDRAWN
 }

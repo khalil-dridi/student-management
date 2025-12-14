@@ -9,6 +9,8 @@ pipeline {
     environment {
         DOCKER_HUB_CREDENTIALS = 'dockerhub-cred'
         DOCKER_IMAGE_NAME = 'khalildridi9/student-management'
+        K8S_NAMESPACE = 'devops'
+        SPRING_SERVICE_NAME = 'spring-service'
     }
 
     stages {
@@ -65,8 +67,19 @@ pipeline {
                 }
             }
         }
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo 'Déploiement sur Kubernetes...'
+                sh """
+                    kubectl set image deployment/student-spring app=${DOCKER_IMAGE_NAME}:latest -n devops
+                    kubectl rollout status deployment/student-spring -n devops
+                """
+            }
+        }
+
 
     }
+
 
     post {
         success {
